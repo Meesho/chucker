@@ -158,7 +158,8 @@ internal class TransactionPayloadFragment :
         payloadBinding.payloadRecyclerView.visibility = View.GONE
         payloadBinding.jsonView.visibility = View.VISIBLE
         payloadBinding.plainHighlightedToggle.setText(R.string.chucker_show_plain)
-        payloadBinding.expandBtn.visibility = View.VISIBLE
+        expand()
+        payloadBinding.collapseBtn.visibility = View.VISIBLE
     }
 
     private fun showPlainText() {
