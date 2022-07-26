@@ -19,7 +19,7 @@ jobs:
     - name: Checkout Repo
       uses: actions/checkout@v2
     - name: Cache Gradle Folders
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.gradle/caches/
@@ -42,7 +42,7 @@ jobs:
     - name: Checkout Repo
       uses: actions/checkout@v2
     - name: Cache Gradle Folders
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.gradle/caches/
@@ -63,7 +63,7 @@ jobs:
     - name: Checkout Repo
       uses: actions/checkout@v2
     - name: Cache Gradle Folders
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.gradle/caches/
@@ -84,7 +84,7 @@ jobs:
     - name: Checkout Repo
       uses: actions/checkout@v2
     - name: Cache Gradle Folders
-      uses: actions/cache@v2
+      uses: actions/cache@v3
       with:
         path: |
           ~/.gradle/caches/
