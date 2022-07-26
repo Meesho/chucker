@@ -16,7 +16,7 @@ buildscript {
         jsonhandleviewVersion = '1.2.2'
 
         // Networking
-        gsonVersion = '2.8.6'
+        gsonVersion = '2.9.0'
         okhttp3Version = '4.9.0'
         retrofitVersion = '2.9.0'
 
