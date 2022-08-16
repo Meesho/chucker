@@ -7,7 +7,7 @@ ktlint {
     verbose = true
     android = false
     outputToConsole = true
-    ignoreFailures = false
+    ignoreFailures = true
     enableExperimentalRules = true
     kotlinScriptAdditionalPaths {
         include fileTree("scripts/")
