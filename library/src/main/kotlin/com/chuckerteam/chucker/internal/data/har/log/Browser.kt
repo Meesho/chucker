@@ -9,3 +9,4 @@ internal data class Browser(
     @SerializedName("version") val version: String,
     @SerializedName("comment") val comment: String? = null
 )
+
