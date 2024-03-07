@@ -76,8 +76,8 @@ dependencies {
 
     implementation "org.brotli:dec:$brotliVersion"
 
-    api platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion")
-    api "com.squareup.okhttp3:okhttp"
+    implementation platform("com.squareup.okhttp3:okhttp-bom:$okhttpVersion")
+    implementation "com.squareup.okhttp3:okhttp"
     testImplementation "com.squareup.okhttp3:mockwebserver"
 
     implementation "com.meesho.android:jsonhandleview:$jsonhandleviewVersion"
