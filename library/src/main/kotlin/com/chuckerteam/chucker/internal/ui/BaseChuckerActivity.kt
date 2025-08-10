@@ -46,7 +46,7 @@ internal abstract class BaseChuckerActivity : AppCompatActivity() {
      * This handles system bars, display cutout, and IME insets.
      */
     private fun setWindowInsets(view: View) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.VANILLA_ICE_CREAM) {
+        if (Build.VERSION.SDK_INT >= 35) {
             ViewCompat.setOnApplyWindowInsetsListener(view) { v, insets ->
                 val bars = insets.getInsets(
                     WindowInsetsCompat.Type.systemBars() or
