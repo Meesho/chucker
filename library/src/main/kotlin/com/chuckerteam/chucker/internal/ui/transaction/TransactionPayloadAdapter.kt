@@ -112,7 +112,24 @@ internal sealed class TransactionPayloadViewHolder(view: View) : RecyclerView.Vi
         override fun bind(item: TransactionPayloadItem) {
             if (item is TransactionPayloadItem.HeaderItem) {
                 headerBinding.responseHeaders.text = item.headers
+                headerBinding.headersContainer.setOnClickListener {
+                    toggleHeaders()
+                }
             }
+        }
+
+        private fun toggleHeaders() {
+            val isVisible = headerBinding.responseHeaders.visibility == View.VISIBLE
+            headerBinding.responseHeaders.visibility = if (isVisible) View.GONE else View.VISIBLE
+            headerBinding.headersArrow.rotation = if (isVisible) ARROW_ROTATION_COLLAPSED else ARROW_ROTATION_EXPANDED
+            headerBinding.headersArrow.contentDescription = headerBinding.root.context.getString(
+                if (isVisible) R.string.chucker_expand_headers else R.string.chucker_collapse_headers
+            )
+        }
+
+        private companion object {
+            const val ARROW_ROTATION_EXPANDED = 0f
+            const val ARROW_ROTATION_COLLAPSED = -90f
         }
     }
 
