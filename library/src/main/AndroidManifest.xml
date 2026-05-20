@@ -16,6 +16,7 @@
     <application>
         <activity
             android:name="com.chuckerteam.chucker.internal.ui.MainActivity"
+            android:exported="false"
             android:label="@string/chucker_name"
             android:launchMode="singleTask"
             android:taskAffinity="com.chuckerteam.chucker.task"
@@ -23,6 +24,7 @@
 
         <activity
             android:name="com.chuckerteam.chucker.internal.ui.transaction.TransactionActivity"
+            android:exported="false"
             android:parentActivityName="com.chuckerteam.chucker.internal.ui.MainActivity"
             android:theme="@style/Chucker.Theme" />
 

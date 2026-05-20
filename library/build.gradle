@@ -14,6 +14,7 @@ android {
 
     defaultConfig {
         minSdkVersion rootProject.minSdkVersion
+        targetSdkVersion rootProject.targetSdkVersion
         consumerProguardFiles 'proguard-rules.pro'
         resValue("string", "chucker_version", "$VERSION_NAME")
     }
