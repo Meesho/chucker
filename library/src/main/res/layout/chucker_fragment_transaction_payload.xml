@@ -44,6 +44,37 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <Button
+        android:id="@+id/plainToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/chucker_base_grid"
+        android:text="@string/chucker_highlight"
+        android:visibility="gone"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible" />
+
+    <Button
+        android:id="@+id/expandAllButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/chucker_base_grid"
+        android:text="@string/chucker_expand_all"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/collapseAllButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/chucker_base_grid"
+        android:text="@string/chucker_collapse_all"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/payloadRecyclerView"
         android:layout_width="0dp"
@@ -56,8 +87,33 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/plainToggleButton"
         tools:listitem="@layout/chucker_transaction_item_body_line"
+        tools:visibility="visible" />
+
+    <com.meesho.android.jsonhandleview.JsonView
+        android:id="@+id/jsonView"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:padding="@dimen/chucker_doub_grid"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/plainToggleButton" />
+
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/nextHighlightFab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="@dimen/chucker_doub_grid"
+        android:contentDescription="@string/chucker_search"
+        android:src="@drawable/chucker_arrow_down"
+        android:visibility="gone"
+        app:backgroundTint="@color/chucker_color_primary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:tint="@color/chucker_color_on_primary"
         tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Group

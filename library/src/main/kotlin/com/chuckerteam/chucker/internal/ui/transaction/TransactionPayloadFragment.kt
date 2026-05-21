@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.text.SpannableStringBuilder
+import android.util.DisplayMetrics
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -20,12 +21,16 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
+import com.chuckerteam.chucker.GsonInstance
 import com.chuckerteam.chucker.R
 import com.chuckerteam.chucker.databinding.ChuckerFragmentTransactionPayloadBinding
 import com.chuckerteam.chucker.internal.data.entity.HttpTransaction
 import com.chuckerteam.chucker.internal.support.Logger
 import com.chuckerteam.chucker.internal.support.calculateLuminance
 import com.chuckerteam.chucker.internal.support.combineLatest
+import com.google.gson.JsonSyntaxException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -68,6 +73,10 @@ internal class TransactionPayloadFragment :
     private var backgroundSpanColor: Int = Color.YELLOW
     private var foregroundSpanColor: Int = Color.RED
 
+    private var isHighlightedMode: Boolean = false
+    private var currentBodyString: String = ""
+    private var hasJsonBody: Boolean = false
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -93,6 +102,25 @@ internal class TransactionPayloadFragment :
             setHasFixedSize(true)
             adapter = payloadAdapter
         }
+
+        payloadBinding.plainToggleButton.setOnClickListener {
+            isHighlightedMode = !isHighlightedMode
+            applyDisplayMode()
+        }
+
+        payloadBinding.expandAllButton.setOnClickListener {
+            payloadBinding.jsonView.expandAll()
+            payloadBinding.expandAllButton.visibility = View.GONE
+            payloadBinding.collapseAllButton.visibility = View.VISIBLE
+        }
+
+        payloadBinding.collapseAllButton.setOnClickListener {
+            payloadBinding.jsonView.collapseAll()
+            payloadBinding.collapseAllButton.visibility = View.GONE
+            payloadBinding.expandAllButton.visibility = View.VISIBLE
+        }
+
+        payloadBinding.nextHighlightFab.setOnClickListener { scrollToNextHighlight() }
 
         viewModel.transaction.combineLatest(viewModel.formatRequestBody).observe(
             viewLifecycleOwner,
@@ -126,13 +154,89 @@ internal class TransactionPayloadFragment :
             }
             emptyStateGroup.visibility = View.VISIBLE
             payloadRecyclerView.visibility = View.GONE
+            jsonView.visibility = View.GONE
+            plainToggleButton.visibility = View.GONE
+            expandAllButton.visibility = View.GONE
+            collapseAllButton.visibility = View.GONE
+            nextHighlightFab.visibility = View.GONE
         }
     }
 
     private fun showPayloadState() {
         payloadBinding.apply {
             emptyStateGroup.visibility = View.GONE
-            payloadRecyclerView.visibility = View.VISIBLE
+            plainToggleButton.visibility = if (hasJsonBody) View.VISIBLE else View.GONE
+        }
+        applyDisplayMode()
+    }
+
+    private fun applyDisplayMode() {
+        payloadBinding.apply {
+            if (isHighlightedMode && hasJsonBody) {
+                plainToggleButton.text = getString(R.string.chucker_show_plain)
+                payloadRecyclerView.visibility = View.GONE
+                jsonView.visibility = View.VISIBLE
+                expandAllButton.visibility = View.GONE
+                collapseAllButton.visibility = View.VISIBLE
+                nextHighlightFab.visibility = View.GONE
+                jsonView.setJson(prettyPrint(currentBodyString))
+            } else {
+                plainToggleButton.text = getString(R.string.chucker_highlight)
+                payloadRecyclerView.visibility = View.VISIBLE
+                jsonView.visibility = View.GONE
+                expandAllButton.visibility = View.GONE
+                collapseAllButton.visibility = View.GONE
+            }
+        }
+    }
+
+    private fun scrollToNextHighlight() {
+        val recyclerView = payloadBinding.payloadRecyclerView
+        val layoutManager = recyclerView.layoutManager as? LinearLayoutManager ?: return
+        val currentPosition = layoutManager.findFirstVisibleItemPosition()
+        var target = payloadAdapter.findNextHighlightedItem(currentPosition + 1)
+        if (target < 0) {
+            target = payloadAdapter.findNextHighlightedItem(0)
+        }
+        if (target < 0) {
+            Toast.makeText(requireContext(), R.string.chucker_no_matches_found, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val smoothScroller = object : LinearSmoothScroller(recyclerView.context) {
+            override fun getVerticalSnapPreference(): Int = SNAP_TO_START
+
+            override fun calculateSpeedPerPixel(displayMetrics: DisplayMetrics?): Float {
+                return SCROLL_MILLIS_PER_INCH / (displayMetrics?.densityDpi?.toFloat() ?: 1f)
+            }
+        }
+        smoothScroller.targetPosition = target
+        layoutManager.startSmoothScroll(smoothScroller)
+    }
+
+    private fun updateFabVisibility() {
+        val hasMatch = payloadAdapter.findNextHighlightedItem(0) >= 0
+        payloadBinding.nextHighlightFab.visibility =
+            if (hasMatch && !isHighlightedMode) View.VISIBLE else View.GONE
+    }
+
+    private fun prettyPrint(str: String): String {
+        val gson = GsonInstance.get() ?: return str
+        return try {
+            val element = gson.fromJson(str, Any::class.java) ?: return str
+            gson.toJson(element)
+        } catch (ignore: JsonSyntaxException) {
+            str
+        }
+    }
+
+    private fun isJson(body: String): Boolean {
+        if (body.isBlank()) return false
+        val gson = GsonInstance.get() ?: return false
+        return try {
+            gson.fromJson(body, Any::class.java)
+            true
+        } catch (ignore: JsonSyntaxException) {
+            false
         }
     }
 
@@ -203,6 +307,7 @@ internal class TransactionPayloadFragment :
         } else {
             payloadAdapter.resetHighlight()
         }
+        updateFabVisibility()
         return true
     }
 
@@ -232,6 +337,9 @@ internal class TransactionPayloadFragment :
                 bodyString = transaction.getFormattedResponseBody()
             }
 
+            currentBodyString = bodyString
+            hasJsonBody = !isBodyEncoded && isJson(bodyString)
+
             if (headersString.isNotBlank()) {
                 result.add(
                     TransactionPayloadItem.HeaderItem(
@@ -247,8 +355,7 @@ internal class TransactionPayloadFragment :
             val responseBitmap = transaction.responseImageBitmap
 
             if (type == PayloadType.RESPONSE && responseBitmap != null) {
-                val bitmapLuminance = responseBitmap.calculateLuminance()
-                result.add(TransactionPayloadItem.ImageItem(responseBitmap, bitmapLuminance))
+                result.add(TransactionPayloadItem.ImageItem(responseBitmap, responseBitmap.calculateLuminance()))
                 return@withContext result
             }
 
@@ -300,6 +407,7 @@ internal class TransactionPayloadFragment :
         private const val TRANSACTION_EXCEPTION = "Transaction not ready"
 
         private const val NUMBER_OF_IGNORED_SYMBOLS = 1
+        private const val SCROLL_MILLIS_PER_INCH = 100f
 
         const val DEFAULT_FILE_PREFIX = "chucker-export-"
 

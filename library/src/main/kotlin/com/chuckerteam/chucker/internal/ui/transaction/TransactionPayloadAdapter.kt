@@ -84,6 +84,22 @@ internal class TransactionBodyAdapter : RecyclerView.Adapter<TransactionPayloadV
             }
     }
 
+    internal fun findNextHighlightedItem(offset: Int): Int {
+        val safeOffset = offset.coerceAtLeast(0)
+        for (index in safeOffset until items.size) {
+            val item = items[index]
+            if (item is TransactionPayloadItem.BodyLineItem) {
+                if (item.line.isNotEmpty()) {
+                    val spans = item.line.getSpans(0, item.line.length, Any::class.java)
+                    if (spans.isNotEmpty()) {
+                        return index
+                    }
+                }
+            }
+        }
+        return -1
+    }
+
     internal fun resetHighlight() {
         items.filterIsInstance<TransactionPayloadItem.BodyLineItem>()
             .withIndex()

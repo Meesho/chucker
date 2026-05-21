@@ -2,7 +2,7 @@
 echo "Running pre-commit checks..."
 
 OUTPUT="/tmp/analysis-result"
-./gradlew detekt ktlintCheck > ${OUTPUT}
+./gradlew test lint detekt ktlintCheck > ${OUTPUT}
 EXIT_CODE=$?
 if [ ${EXIT_CODE} -ne 0 ]; then
     cat ${OUTPUT}

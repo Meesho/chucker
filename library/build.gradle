@@ -2,10 +2,43 @@ apply plugin: 'com.android.library'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-kapt'
 
+def versionName = {
+    def stdout = new ByteArrayOutputStream()
+    def errout = new ByteArrayOutputStream()
+    try {
+        exec {
+            commandLine 'git', 'tag', '--points-at', 'HEAD'
+            standardOutput = stdout
+            errorOutput = errout
+            ignoreExitValue = true
+        }
+    } catch (Exception ignored) {
+        return "unknown-SNAPSHOT"
+    }
+    def tag = stdout.toString().trim()
+    if (tag != null && !tag.isEmpty()) {
+        return tag
+    }
+    def branchStream = new ByteArrayOutputStream()
+    try {
+        exec {
+            commandLine 'git', 'rev-parse', '--abbrev-ref', 'HEAD'
+            standardOutput = branchStream
+            ignoreExitValue = true
+        }
+    } catch (Exception ignored) {
+        return "unknown-SNAPSHOT"
+    }
+    def branch = branchStream.toString().trim().replace('/', '-')
+    return "${branch}-SNAPSHOT"
+}
+
 android {
     compileSdkVersion rootProject.compileSdkVersion
 
     compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
         kotlinOptions.freeCompilerArgs += [
             '-module-name', "com.github.ChuckerTeam.Chucker.library",
             "-Xexplicit-api=strict"
@@ -66,6 +99,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$coroutineVersion"
 
     implementation "com.google.code.gson:gson:$gsonVersion"
+    implementation "com.meesho.android:jsonhandleview:$jsonhandleviewVersion"
 
     implementation "org.brotli:dec:$brotliVersion"
 
@@ -75,15 +109,50 @@ dependencies {
 
     testImplementation "org.junit.jupiter:junit-jupiter-api:$junitVersion"
     testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:$junitVersion"
-    testImplementation "junit:junit:$junit4Version"
+    testImplementation "junit:junit:$vintageJunitVersion"
     testRuntimeOnly "org.junit.vintage:junit-vintage-engine:$junitVersion"
     testImplementation "org.junit.jupiter:junit-jupiter-params:$junitVersion"
     testImplementation "io.mockk:mockk:$mockkVersion"
     testImplementation "androidx.test:core:$androidxTestCoreVersion"
-    testImplementation "androidx.arch.core:core-testing:$androidXCoreVersion"
+    testImplementation "androidx.arch.core:core-testing:$androidXArchTestVersion"
     testImplementation "com.google.truth:truth:$truthVersion"
     testImplementation "org.robolectric:robolectric:$robolectricVersion"
 }
 
-apply from: rootProject.file('gradle/gradle-mvn-push.gradle')
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    from android.sourceSets.main.java.srcDirs
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            aar(MavenPublication) {
+                groupId = 'com.meesho.android.chucker'
+                artifactId = project.name
+                version = versionName()
+                from components.release
+                artifact androidSourcesJar
+            }
+        }
+    }
+}
+
+artifactory {
+    contextUrl = "${JFROG_ARTIFACTORY_URL}"
+    publish {
+        repository {
+            repoKey = versionName().endsWith('SNAPSHOT') ? "${SNAPSHOT_REPO_NAME}" : "${RELEASE_REPO_NAME}"
+            username = "${JFROG_ARTIFACTORY_USERNAME}"
+            password = "${JFROG_ARTIFACTORY_KEY}"
+            maven = true
+        }
+        defaults {
+            publications('aar')
+            publishArtifacts = true
+            publishPom = true
+        }
+    }
+}
+
 apply from: rootProject.file('gradle/kotlin-static-analysis.gradle')
