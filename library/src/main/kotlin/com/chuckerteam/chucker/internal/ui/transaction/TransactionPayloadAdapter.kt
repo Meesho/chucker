@@ -112,7 +112,22 @@ internal sealed class TransactionPayloadViewHolder(view: View) : RecyclerView.Vi
         override fun bind(item: TransactionPayloadItem) {
             if (item is TransactionPayloadItem.HeaderItem) {
                 headerBinding.responseHeaders.text = item.headers
+                applyExpandedState(item.isExpanded)
+                headerBinding.headersToggle.setOnClickListener {
+                    item.isExpanded = !item.isExpanded
+                    applyExpandedState(item.isExpanded)
+                }
             }
+        }
+
+        private fun applyExpandedState(isExpanded: Boolean) {
+            headerBinding.responseHeaders.visibility = if (isExpanded) View.VISIBLE else View.GONE
+            headerBinding.headersArrow.rotation = if (isExpanded) EXPANDED_ROTATION else COLLAPSED_ROTATION
+        }
+
+        private companion object {
+            const val EXPANDED_ROTATION = 180f
+            const val COLLAPSED_ROTATION = 0f
         }
     }
 
@@ -164,7 +179,7 @@ internal sealed class TransactionPayloadViewHolder(view: View) : RecyclerView.Vi
 }
 
 internal sealed class TransactionPayloadItem {
-    internal class HeaderItem(val headers: Spanned) : TransactionPayloadItem()
+    internal class HeaderItem(val headers: Spanned, var isExpanded: Boolean = true) : TransactionPayloadItem()
     internal class BodyLineItem(var line: SpannableStringBuilder) : TransactionPayloadItem()
     internal class ImageItem(val image: Bitmap, val luminance: Double?) : TransactionPayloadItem()
 }

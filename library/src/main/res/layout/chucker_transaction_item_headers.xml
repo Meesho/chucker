@@ -1,9 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/responseHeaders"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_marginHorizontal="@dimen/chucker_doub_grid"
-    android:textIsSelectable="true"
-    tools:text="Content-Type: application/json" />
+    android:animateLayoutChanges="true"
+    android:orientation="vertical">
+
+    <LinearLayout
+        android:id="@+id/headersToggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?android:attr/selectableItemBackground"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:minHeight="@dimen/chucker_item_size"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/chucker_doub_grid">
+
+        <TextView
+            android:id="@+id/headersTitle"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="@string/chucker_headers"
+            android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/headersArrow"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:contentDescription="@string/chucker_headers"
+            android:src="@drawable/chucker_ic_arrow_down"
+            app:tint="?attr/colorOnSurface" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/responseHeaders"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/chucker_doub_grid"
+        android:textIsSelectable="true"
+        tools:text="Content-Type: application/json" />
+
+</LinearLayout>
