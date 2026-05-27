@@ -172,3 +172,10 @@ Publishes as `com.meesho.android.chucker:library` / `com.meesho.android.chucker:
 | **Async** | Kotlin Coroutines 1.7.3 + LiveData |
 | **UI** | AppCompat + Material 1.2.1 + ViewBinding |
 | **Testing** | JUnit 5, MockK 1.10.2, Robolectric 4.4, Truth 1.1 |
+
+<!-- BEGIN meesho-managed-references -->
+## Documentation
+
+- Current architecture explained in [docs/architecture.md](docs/architecture.md).
+- See [docs/wiki/index.md](docs/wiki/index.md) for synthesized knowledge — concept pages, entity pages, design notes.
+<!-- END meesho-managed-references -->
